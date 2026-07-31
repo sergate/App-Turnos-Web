@@ -3,6 +3,24 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+// No debe frenar el login si falla -- es solo trazabilidad para el admin.
+async function registrarLogin(supabase: SupabaseClient) {
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase.from("activity_log").insert({
+      actor_id: user.id,
+      actor_email: user.email,
+      action: "login",
+    });
+  } catch {
+    // ignorado a propósito
+  }
+}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -47,6 +65,7 @@ export default function LoginPage() {
           );
         }
 
+        await registrarLogin(supabase);
         router.push("/");
         router.refresh();
         return;
@@ -87,6 +106,7 @@ export default function LoginPage() {
         return;
       }
 
+      await registrarLogin(supabase);
       router.push("/");
       router.refresh();
     } catch (err) {

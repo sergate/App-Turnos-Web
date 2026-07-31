@@ -18,7 +18,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .eq("id", user.id)
     .single();
 
-  const role = profile?.role === "admin" ? "admin" : "proveedor";
+  const role =
+    profile?.role === "admin" ? "admin" : profile?.role === "supervisor" ? "supervisor" : "proveedor";
   const displayName = profile?.company_name || profile?.full_name || user.email || "";
 
   return (

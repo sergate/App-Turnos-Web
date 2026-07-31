@@ -55,7 +55,8 @@ export async function proxy(request: NextRequest) {
       .maybeSingle();
 
     const esAdmin = profile?.role === "admin";
-    const home = esAdmin ? "/dashboard" : "/nuevo-turno";
+    const esStaff = esAdmin || profile?.role === "supervisor";
+    const home = esStaff ? "/dashboard" : "/nuevo-turno";
 
     if (esLogin || pathname === "/") {
       const url = request.nextUrl.clone();
@@ -63,9 +64,18 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    if (pathname.startsWith("/dashboard") && !esAdmin) {
+    if (pathname.startsWith("/dashboard") && !esStaff) {
       const url = request.nextUrl.clone();
       url.pathname = "/nuevo-turno";
+      return NextResponse.redirect(url);
+    }
+
+    // Franjas, usuarios y el log de auditoría quedan reservados a admin;
+    // un supervisor que intente entrar vuelve al listado de pendientes.
+    const RUTAS_SOLO_ADMIN = ["/dashboard/franjas", "/dashboard/usuarios", "/dashboard/log"];
+    if (RUTAS_SOLO_ADMIN.some((ruta) => pathname.startsWith(ruta)) && esStaff && !esAdmin) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/dashboard";
       return NextResponse.redirect(url);
     }
   }

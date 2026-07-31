@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 type NavbarProps = {
-  role: "proveedor" | "admin";
+  role: "proveedor" | "supervisor" | "admin";
   displayName: string;
 };
 
@@ -14,16 +14,22 @@ const PROVIDER_LINKS = [
   { href: "/mis-turnos", label: "Mis turnos" },
 ];
 
-const ADMIN_LINKS = [
+const STAFF_LINKS = [
   { href: "/dashboard", label: "Turnos pendientes" },
   { href: "/dashboard/semana", label: "Semana" },
+];
+
+const ADMIN_ONLY_LINKS = [
   { href: "/dashboard/franjas", label: "Franjas horarias" },
+  { href: "/dashboard/usuarios", label: "Usuarios" },
+  { href: "/dashboard/log", label: "Actividad" },
 ];
 
 export default function Navbar({ role, displayName }: NavbarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const links = role === "admin" ? ADMIN_LINKS : PROVIDER_LINKS;
+  const links =
+    role === "proveedor" ? PROVIDER_LINKS : role === "admin" ? [...STAFF_LINKS, ...ADMIN_ONLY_LINKS] : STAFF_LINKS;
 
   const handleLogout = async () => {
     const supabase = createClient();

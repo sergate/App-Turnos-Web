@@ -1,5 +1,6 @@
 "use server";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { sendNotificationEmail } from "@/lib/email";
@@ -8,9 +9,14 @@ import { formatHora } from "@/lib/slots";
 
 type ActionResult = { success: boolean; error?: string };
 
-async function notificarProveedor(turnoId: string, estado: "aprobado" | "rechazado", motivo?: string) {
-  const supabase = await createClient();
-
+async function notificarYRegistrar(
+  supabase: SupabaseClient,
+  turnoId: string,
+  estado: "aprobado" | "rechazado",
+  actorId: string,
+  actorEmail: string,
+  motivo?: string
+) {
   const { data: turno } = await supabase
     .from("turnos")
     .select("slot_date, slot_start_time, slot_end_time, provider:profiles!turnos_provider_id_fkey(email, company_name)")
@@ -18,33 +24,42 @@ async function notificarProveedor(turnoId: string, estado: "aprobado" | "rechaza
     .single();
 
   const provider = Array.isArray(turno?.provider) ? turno?.provider[0] : turno?.provider;
-  if (!turno || !provider?.email) return;
+  if (!turno) return;
 
   const fecha = formatFecha(turno.slot_date);
   const horario = `${formatHora(turno.slot_start_time)} - ${formatHora(turno.slot_end_time)}`;
 
-  const html =
-    estado === "aprobado"
-      ? `
-        <p>Hola${provider.company_name ? ` ${provider.company_name}` : ""},</p>
-        <p>Tu turno de entrega quedó <strong>aprobado</strong>:</p>
-        <ul>
-          <li><strong>Fecha:</strong> ${fecha}</li>
-          <li><strong>Horario:</strong> ${horario}</li>
-        </ul>
-        <p>Te esperamos en el horario indicado.</p>
-      `
-      : `
-        <p>Hola${provider.company_name ? ` ${provider.company_name}` : ""},</p>
-        <p>Tu turno de entrega para el <strong>${fecha}</strong> (${horario}) fue <strong>rechazado</strong>.</p>
-        ${motivo ? `<p><strong>Motivo:</strong> ${motivo}</p>` : ""}
-        <p>Podés solicitar un nuevo turno cuando quieras.</p>
-      `;
+  if (provider?.email) {
+    const html =
+      estado === "aprobado"
+        ? `
+          <p>Hola${provider.company_name ? ` ${provider.company_name}` : ""},</p>
+          <p>Tu turno de entrega quedó <strong>aprobado</strong>:</p>
+          <ul>
+            <li><strong>Fecha:</strong> ${fecha}</li>
+            <li><strong>Horario:</strong> ${horario}</li>
+          </ul>
+          <p>Te esperamos en el horario indicado.</p>
+        `
+        : `
+          <p>Hola${provider.company_name ? ` ${provider.company_name}` : ""},</p>
+          <p>Tu turno de entrega para el <strong>${fecha}</strong> (${horario}) fue <strong>rechazado</strong>.</p>
+          ${motivo ? `<p><strong>Motivo:</strong> ${motivo}</p>` : ""}
+          <p>Podés solicitar un nuevo turno cuando quieras.</p>
+        `;
 
-  await sendNotificationEmail({
-    to: provider.email,
-    subject: estado === "aprobado" ? "Turno de entrega aprobado" : "Turno de entrega rechazado",
-    html,
+    await sendNotificationEmail({
+      to: provider.email,
+      subject: estado === "aprobado" ? "Turno de entrega aprobado" : "Turno de entrega rechazado",
+      html,
+    });
+  }
+
+  await supabase.from("activity_log").insert({
+    actor_id: actorId,
+    actor_email: actorEmail,
+    action: estado === "aprobado" ? "turno_aprobado" : "turno_rechazado",
+    detalle: `${estado === "aprobado" ? "Aprobó" : "Rechazó"} el turno de ${provider?.company_name ?? "un proveedor"} para el ${fecha} (${horario})${motivo ? ` -- motivo: ${motivo}` : ""}.`,
   });
 }
 
@@ -63,7 +78,7 @@ export async function aprobarTurno(turnoId: string): Promise<ActionResult> {
 
   if (error) return { success: false, error: error.message };
 
-  await notificarProveedor(turnoId, "aprobado");
+  await notificarYRegistrar(supabase, turnoId, "aprobado", user.id, user.email ?? "");
   revalidatePath("/dashboard");
   return { success: true };
 }
@@ -88,7 +103,7 @@ export async function rechazarTurno(turnoId: string, motivo: string): Promise<Ac
 
   if (error) return { success: false, error: error.message };
 
-  await notificarProveedor(turnoId, "rechazado", motivo.trim() || undefined);
+  await notificarYRegistrar(supabase, turnoId, "rechazado", user.id, user.email ?? "", motivo.trim() || undefined);
   revalidatePath("/dashboard");
   return { success: true };
 }
