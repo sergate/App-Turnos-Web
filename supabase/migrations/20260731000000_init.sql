@@ -115,7 +115,7 @@ create table public.turnos (
   slot_start_time time not null,
   slot_end_time time not null,
   detalle text not null,
-  remito_url text not null,
+  remito_path text not null, -- path del objeto en el bucket privado "remitos" (no URL pública)
   estado text not null default 'pendiente' check (estado in ('pendiente', 'aprobado', 'rechazado')),
   motivo_rechazo text,
   reviewed_by uuid references public.profiles (id),
