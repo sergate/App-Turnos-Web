@@ -16,6 +16,7 @@ const PROVIDER_LINKS = [
 
 const ADMIN_LINKS = [
   { href: "/dashboard", label: "Turnos pendientes" },
+  { href: "/dashboard/semana", label: "Semana" },
   { href: "/dashboard/franjas", label: "Franjas horarias" },
 ];
 
