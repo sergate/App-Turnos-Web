@@ -10,6 +10,7 @@ create extension if not exists pgcrypto;
 create table public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
   role text not null default 'proveedor' check (role in ('proveedor', 'admin')),
+  email text not null,
   full_name text,
   company_name text,
   phone text,
@@ -27,9 +28,10 @@ language plpgsql
 security definer set search_path = public
 as $$
 begin
-  insert into public.profiles (id, full_name, company_name, phone)
+  insert into public.profiles (id, email, full_name, company_name, phone)
   values (
     new.id,
+    new.email,
     new.raw_user_meta_data ->> 'full_name',
     new.raw_user_meta_data ->> 'company_name',
     new.raw_user_meta_data ->> 'phone'
