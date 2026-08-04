@@ -72,3 +72,12 @@ export function addDaysISO(fechaISO: string, dias: number): string {
   fecha.setDate(fecha.getDate() + dias);
   return toFechaISO(fecha);
 }
+
+const ZONA_HORARIA = "America/Argentina/Buenos_Aires";
+
+// Formatea un timestamp (ISO con hora, ej. de activity_log.created_at) fijo
+// en horario de Buenos Aires -- sin esto, toLocaleString() usa la zona
+// horaria del entorno donde corre (UTC en Vercel), no la del usuario.
+export function formatFechaHora(timestampISO: string): string {
+  return new Date(timestampISO).toLocaleString("es-AR", { timeZone: ZONA_HORARIA });
+}

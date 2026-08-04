@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { ACCION_LABELS, type AccionLog } from "@/lib/activityLog";
+import { formatFechaHora } from "@/lib/turnos";
 
 const LIMITE = 200;
 
@@ -31,9 +32,7 @@ export default async function LogPage() {
               <span className="font-medium text-slate-800">
                 {ACCION_LABELS[evento.action as AccionLog] ?? evento.action}
               </span>
-              <span className="text-xs text-slate-400">
-                {new Date(evento.created_at).toLocaleString("es-AR")}
-              </span>
+              <span className="text-xs text-slate-400">{formatFechaHora(evento.created_at)}</span>
             </div>
             <p className="text-slate-500 text-xs mt-0.5">{evento.actor_email}</p>
             {evento.detalle && <p className="text-slate-600 mt-1">{evento.detalle}</p>}
