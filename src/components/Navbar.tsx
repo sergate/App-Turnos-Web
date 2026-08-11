@@ -16,6 +16,7 @@ const PROVIDER_LINKS = [
 
 const STAFF_LINKS = [
   { href: "/dashboard", label: "Turnos pendientes" },
+  { href: "/dashboard/otorgar-turno", label: "Otorgar turno" },
   { href: "/dashboard/semana", label: "Semana" },
 ];
 

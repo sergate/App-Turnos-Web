@@ -19,7 +19,7 @@ export default async function SemanaPage({
   const { data: turnos, error } = await supabase
     .from("turnos")
     .select(
-      "id, slot_date, slot_start_time, slot_end_time, detalle, provider:profiles!turnos_provider_id_fkey(company_name, full_name)"
+      "id, slot_date, slot_start_time, slot_end_time, detalle, provider_name, created_by, provider:profiles!turnos_provider_id_fkey(company_name, full_name)"
     )
     .eq("estado", "aprobado")
     .gte("slot_date", semana.start)
@@ -27,13 +27,17 @@ export default async function SemanaPage({
     .order("slot_date", { ascending: true })
     .order("slot_start_time", { ascending: true });
 
-  const turnosPorDia = new Map<string, { id: string; horario: string; provider: ProviderInfo; detalle: string }[]>();
+  const turnosPorDia = new Map<
+    string,
+    { id: string; horario: string; nombreProveedor: string; otorgadoDirecto: boolean; detalle: string }[]
+  >();
   for (const turno of turnos ?? []) {
     const provider = (Array.isArray(turno.provider) ? turno.provider[0] : turno.provider) as ProviderInfo;
     const entry = {
       id: turno.id,
       horario: `${formatHora(turno.slot_start_time)} - ${formatHora(turno.slot_end_time)}`,
-      provider,
+      nombreProveedor: provider?.company_name ?? turno.provider_name ?? "—",
+      otorgadoDirecto: !!turno.created_by,
       detalle: turno.detalle,
     };
     const existing = turnosPorDia.get(turno.slot_date);
@@ -90,7 +94,14 @@ export default async function SemanaPage({
                   {turnosDelDia.map((t) => (
                     <div key={t.id} className="flex flex-wrap items-baseline justify-between gap-2 text-sm">
                       <span className="font-medium text-slate-700">{t.horario}</span>
-                      <span className="text-slate-600">{t.provider?.company_name ?? "—"}</span>
+                      <span className="text-slate-600">
+                        {t.nombreProveedor}
+                        {t.otorgadoDirecto && (
+                          <span className="ml-1 text-xs text-blue-500" title="Otorgado directamente por el equipo">
+                            (directo)
+                          </span>
+                        )}
+                      </span>
                       <span className="text-slate-400 text-xs w-full sm:w-auto">{t.detalle}</span>
                     </div>
                   ))}
