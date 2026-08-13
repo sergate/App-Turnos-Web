@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatHora } from "@/lib/slots";
 import { addDaysISO, formatFechaCorta, getWeekRange, toFechaISO } from "@/lib/turnos";
 import SemanaDatePicker from "./SemanaDatePicker";
+import TurnoRowActions from "./TurnoRowActions";
 
 type ProviderInfo = { company_name: string | null; full_name: string | null } | null;
 
@@ -16,6 +17,12 @@ export default async function SemanaPage({
   const semana = getWeekRange(fecha);
 
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const { data: perfil } = await supabase.from("profiles").select("role").eq("id", user!.id).single();
+  const esAdmin = perfil?.role === "admin";
+
   const { data: turnos, error } = await supabase
     .from("turnos")
     .select(
@@ -90,19 +97,22 @@ export default async function SemanaPage({
               {turnosDelDia.length === 0 ? (
                 <p className="text-sm text-slate-400">Sin turnos otorgados.</p>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {turnosDelDia.map((t) => (
-                    <div key={t.id} className="flex flex-wrap items-baseline justify-between gap-2 text-sm">
-                      <span className="font-medium text-slate-700">{t.horario}</span>
-                      <span className="text-slate-600">
-                        {t.nombreProveedor}
-                        {t.otorgadoDirecto && (
-                          <span className="ml-1 text-xs text-blue-500" title="Otorgado directamente por el equipo">
-                            (directo)
-                          </span>
-                        )}
-                      </span>
-                      <span className="text-slate-400 text-xs w-full sm:w-auto">{t.detalle}</span>
+                    <div key={t.id} className="border-t border-slate-100 pt-2 first:border-t-0 first:pt-0">
+                      <div className="flex flex-wrap items-baseline justify-between gap-2 text-sm">
+                        <span className="font-medium text-slate-700">{t.horario}</span>
+                        <span className="text-slate-600">
+                          {t.nombreProveedor}
+                          {t.otorgadoDirecto && (
+                            <span className="ml-1 text-xs text-blue-500" title="Otorgado directamente por el equipo">
+                              (directo)
+                            </span>
+                          )}
+                        </span>
+                        <span className="text-slate-400 text-xs w-full sm:w-auto">{t.detalle}</span>
+                      </div>
+                      <TurnoRowActions turnoId={t.id} esAdmin={esAdmin} />
                     </div>
                   ))}
                 </div>
