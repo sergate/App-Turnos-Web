@@ -15,3 +15,9 @@ as $$
 $$;
 
 grant execute on function public.mark_password_changed() to authenticated;
+-- Supabase otorga EXECUTE a anon por defecto en funciones nuevas del
+-- schema public -- se lo sacamos explícitamente (ver migración
+-- 20260804000000 y 20260731000002 para el mismo problema con otras
+-- funciones).
+revoke execute on function public.mark_password_changed() from public;
+revoke execute on function public.mark_password_changed() from anon;
