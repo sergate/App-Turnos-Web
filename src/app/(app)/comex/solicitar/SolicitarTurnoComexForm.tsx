@@ -132,7 +132,7 @@ export default function SolicitarTurnoComexForm() {
 
   return (
     <div className="max-w-xl mx-auto">
-      <h1 className="text-lg font-bold text-slate-800 mb-1">Solicitar turno para proveedor nacional</h1>
+      <h1 className="text-lg font-bold text-slate-800 mb-1">Solicitar turno</h1>
       <p className="text-sm text-slate-500 mb-6">
         Sugerí una fecha y franja. El depósito la revisa y puede aprobarla, reprogramarla a otra franja o
         rechazarla según su disponibilidad.
