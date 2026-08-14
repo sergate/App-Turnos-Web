@@ -33,6 +33,7 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
   const esLogin = pathname.startsWith("/login");
+  const esCambiarPassword = pathname.startsWith("/cambiar-password");
 
   if (!user && !esLogin) {
     const url = request.nextUrl.clone();
@@ -44,40 +45,47 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
-  // Rutas que dependen del rol: solo se consulta profiles cuando hace falta.
-  const necesitaRol = esLogin || pathname === "/" || pathname.startsWith("/dashboard");
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role, must_change_password")
+    .eq("id", user.id)
+    .maybeSingle();
 
-  if (necesitaRol) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .maybeSingle();
+  // Contraseña por defecto sin cambiar (personal interno recién creado):
+  // no puede navegar a ningún lado hasta que la cambie.
+  if (profile?.must_change_password && !esCambiarPassword) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/cambiar-password";
+    return NextResponse.redirect(url);
+  }
 
-    const esAdmin = profile?.role === "admin";
-    const esStaff = esAdmin || profile?.role === "supervisor";
-    const home = esStaff ? "/dashboard" : "/nuevo-turno";
+  if (esCambiarPassword) {
+    return response;
+  }
 
-    if (esLogin || pathname === "/") {
-      const url = request.nextUrl.clone();
-      url.pathname = home;
-      return NextResponse.redirect(url);
-    }
+  const esAdmin = profile?.role === "admin";
+  const esStaff = esAdmin || profile?.role === "supervisor";
+  const home = esStaff ? "/dashboard" : "/nuevo-turno";
 
-    if (pathname.startsWith("/dashboard") && !esStaff) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/nuevo-turno";
-      return NextResponse.redirect(url);
-    }
+  if (esLogin || pathname === "/") {
+    const url = request.nextUrl.clone();
+    url.pathname = home;
+    return NextResponse.redirect(url);
+  }
 
-    // Franjas, usuarios y el log de auditoría quedan reservados a admin;
-    // un supervisor que intente entrar vuelve al listado de pendientes.
-    const RUTAS_SOLO_ADMIN = ["/dashboard/franjas", "/dashboard/usuarios", "/dashboard/log"];
-    if (RUTAS_SOLO_ADMIN.some((ruta) => pathname.startsWith(ruta)) && esStaff && !esAdmin) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/dashboard";
-      return NextResponse.redirect(url);
-    }
+  if (pathname.startsWith("/dashboard") && !esStaff) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/nuevo-turno";
+    return NextResponse.redirect(url);
+  }
+
+  // Franjas, usuarios y el log de auditoría quedan reservados a admin;
+  // un supervisor que intente entrar vuelve al listado de pendientes.
+  const RUTAS_SOLO_ADMIN = ["/dashboard/franjas", "/dashboard/usuarios", "/dashboard/log"];
+  if (RUTAS_SOLO_ADMIN.some((ruta) => pathname.startsWith(ruta)) && esStaff && !esAdmin) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/dashboard";
+    return NextResponse.redirect(url);
   }
 
   return response;

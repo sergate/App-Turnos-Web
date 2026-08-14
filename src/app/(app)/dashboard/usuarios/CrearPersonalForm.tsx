@@ -64,9 +64,9 @@ export default function CrearPersonalForm() {
       {error && <p className="text-sm text-red-600">{error}</p>}
       {tempPassword && (
         <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-sm text-emerald-800">
-          Cuenta creada. Contraseña temporal: <code className="font-mono font-semibold">{tempPassword}</code>
+          Cuenta creada. Contraseña por defecto: <code className="font-mono font-semibold">{tempPassword}</code>
           <br />
-          Comunicásela a la persona -- no se vuelve a mostrar.
+          Se le va a pedir cambiarla apenas ingrese por primera vez.
         </div>
       )}
 

@@ -33,6 +33,12 @@ function generarPasswordTemporal(): string {
   return crypto.randomBytes(9).toString("base64url");
 }
 
+// Contraseña por defecto para personal interno (corta, fácil de dictar
+// por teléfono) -- a diferencia de los proveedores, que reciben una
+// aleatoria. Se fuerza el cambio en el primer ingreso vía
+// profiles.must_change_password (ver proxy.ts).
+const PASSWORD_POR_DEFECTO = "Cambiar123";
+
 async function registrarLog(session: AdminSession, detalle: string) {
   await session.supabase.from("activity_log").insert({
     actor_id: session.adminId,
@@ -93,10 +99,9 @@ export async function crearPersonalInterno(input: {
   const fullName = input.fullName.trim();
   if (!email || !fullName) return { success: false, error: "Email y nombre son obligatorios." };
 
-  const tempPassword = generarPasswordTemporal();
   const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
     email,
-    password: tempPassword,
+    password: PASSWORD_POR_DEFECTO,
     email_confirm: true,
     user_metadata: { full_name: fullName },
   });
@@ -110,7 +115,7 @@ export async function crearPersonalInterno(input: {
 
   const { error: roleError } = await auth.session.supabase
     .from("profiles")
-    .update({ role: input.role })
+    .update({ role: input.role, must_change_password: true })
     .eq("id", authData.user.id);
   if (roleError) {
     return { success: false, error: `Usuario creado, pero no se pudo asignar el rol: ${roleError.message}` };
@@ -118,7 +123,7 @@ export async function crearPersonalInterno(input: {
 
   await registrarLog(auth.session, `Dio de alta a ${fullName} (${email}) como ${input.role}.`);
   revalidatePath("/dashboard/usuarios");
-  return { success: true, tempPassword };
+  return { success: true, tempPassword: PASSWORD_POR_DEFECTO };
 }
 
 export async function actualizarRolUsuario(
