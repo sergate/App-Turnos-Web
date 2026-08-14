@@ -7,6 +7,7 @@ export type AccionLog =
   | "turno_reprogramado"
   | "turno_eliminado"
   | "usuario_creado"
+  | "usuario_eliminado"
   | "usuario_rol_actualizado"
   | "franja_creada"
   | "franja_actualizada"
@@ -21,6 +22,7 @@ export const ACCION_LABELS: Record<AccionLog, string> = {
   turno_reprogramado: "Reprogramó un turno",
   turno_eliminado: "Eliminó un turno",
   usuario_creado: "Dio de alta un usuario",
+  usuario_eliminado: "Eliminó un usuario",
   usuario_rol_actualizado: "Cambió un rol",
   franja_creada: "Creó una franja horaria",
   franja_actualizada: "Actualizó una franja horaria",

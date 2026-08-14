@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import CrearProveedorForm from "./CrearProveedorForm";
 import CrearPersonalForm from "./CrearPersonalForm";
 import RolSelector from "./RolSelector";
+import EliminarUsuarioButton from "./EliminarUsuarioButton";
 
 const ROL_LABELS: Record<string, string> = {
   proveedor: "Proveedor",
@@ -50,6 +51,7 @@ export default async function UsuariosPage() {
               <div className="flex items-center gap-3">
                 <span className="text-xs text-slate-500">{ROL_LABELS[p.role] ?? p.role}</span>
                 <RolSelector profileId={p.id} role={p.role} esUnoMismo={p.id === user?.id} />
+                {p.id !== user?.id && <EliminarUsuarioButton profileId={p.id} />}
               </div>
             </div>
           ))}

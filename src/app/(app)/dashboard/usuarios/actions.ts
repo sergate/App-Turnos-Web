@@ -126,6 +126,41 @@ export async function crearPersonalInterno(input: {
   return { success: true, tempPassword: PASSWORD_POR_DEFECTO };
 }
 
+// Solo personal interno (supervisor/comex/admin) -- borrar un proveedor
+// arrastraría en cascada todo su historial de turnos (provider_id
+// referencia profiles con ON DELETE CASCADE), así que por ahora esa
+// acción no está expuesta desde acá.
+export async function eliminarUsuarioInterno(profileId: string): Promise<ActionResult> {
+  const auth = await requireAdmin();
+  if (!auth.ok) return { success: false, error: auth.error };
+  if (!supabaseAdminEnvOk) return { success: false, error: "Faltan configurar las variables de Supabase." };
+  if (profileId === auth.session.adminId) return { success: false, error: "No podés eliminar tu propia cuenta." };
+
+  const { data: target } = await auth.session.supabase
+    .from("profiles")
+    .select("email, full_name, role")
+    .eq("id", profileId)
+    .single();
+
+  if (!target) return { success: false, error: "No se encontró el usuario." };
+  if (target.role === "proveedor") {
+    return { success: false, error: "Esta acción es solo para personal interno." };
+  }
+
+  const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(profileId);
+  if (deleteError) return { success: false, error: deleteError.message };
+
+  await auth.session.supabase.from("activity_log").insert({
+    actor_id: auth.session.adminId,
+    actor_email: auth.session.adminEmail,
+    action: "usuario_eliminado",
+    detalle: `Eliminó a ${target.full_name || target.email} (${target.email}), rol ${target.role}.`,
+  });
+
+  revalidatePath("/dashboard/usuarios");
+  return { success: true };
+}
+
 export async function actualizarRolUsuario(
   profileId: string,
   nuevoRol: "proveedor" | "supervisor" | "admin" | "comex"
