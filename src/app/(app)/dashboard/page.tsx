@@ -60,8 +60,8 @@ export default async function DashboardPage() {
                   {[turno.provider?.full_name, turno.provider?.phone].filter(Boolean).join(" · ")}
                 </p>
                 {turno.requested_by && (
-                  <p className="text-xs text-blue-500" title="Solicitado por Comex">
-                    Comex{turno.requester?.email ? ` · ${turno.requester.email}` : ""}
+                  <p className="text-xs text-blue-500" title="Solicitado por Compras MRN">
+                    Compras MRN{turno.requester?.email ? ` · ${turno.requester.email}` : ""}
                   </p>
                 )}
               </div>

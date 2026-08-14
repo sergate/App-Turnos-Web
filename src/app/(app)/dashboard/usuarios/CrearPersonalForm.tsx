@@ -57,7 +57,7 @@ export default function CrearPersonalForm() {
           className="px-3 py-2 rounded-lg border border-slate-300 text-sm text-slate-800 bg-white"
         >
           <option value="supervisor">Supervisor</option>
-          <option value="comex">Comex</option>
+          <option value="comex">Compras MRN</option>
           <option value="admin">Admin</option>
         </select>
       </div>

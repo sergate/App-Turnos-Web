@@ -46,7 +46,7 @@ export default function RolSelector({
       >
         <option value="proveedor">Proveedor</option>
         <option value="supervisor">Supervisor</option>
-        <option value="comex">Comex</option>
+        <option value="comex">Compras MRN</option>
         <option value="admin">Admin</option>
       </select>
       {error && <p className="text-xs text-red-600 mt-1">{error}</p>}

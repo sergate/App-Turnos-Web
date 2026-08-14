@@ -8,7 +8,7 @@ const ROL_LABELS: Record<string, string> = {
   proveedor: "Proveedor",
   supervisor: "Supervisor",
   admin: "Admin",
-  comex: "Comex",
+  comex: "Compras MRN",
 };
 
 export default async function UsuariosPage() {

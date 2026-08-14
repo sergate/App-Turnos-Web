@@ -48,7 +48,7 @@ export async function solicitarTurnoComex(formData: FormData): Promise<ActionRes
     slot_date: slotDate,
     slot_start_time: slotStartTime,
     slot_end_time: slotEndTime,
-    detalle: detalle || "(solicitado por Comex, sin detalle)",
+    detalle: detalle || "(solicitado por Compras MRN, sin detalle)",
     remito_path: remitoPath,
     estado: "pendiente",
     requested_by: user.id,

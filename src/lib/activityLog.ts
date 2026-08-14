@@ -18,7 +18,7 @@ export const ACCION_LABELS: Record<AccionLog, string> = {
   turno_aprobado: "Aprobó un turno",
   turno_rechazado: "Rechazó un turno",
   turno_otorgado: "Otorgó un turno directamente",
-  turno_solicitado: "Solicitó un turno (Comex)",
+  turno_solicitado: "Solicitó un turno (Compras MRN)",
   turno_reprogramado: "Reprogramó un turno",
   turno_eliminado: "Eliminó un turno",
   usuario_creado: "Dio de alta un usuario",
