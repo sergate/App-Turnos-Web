@@ -3,7 +3,12 @@ import CrearProveedorForm from "./CrearProveedorForm";
 import CrearPersonalForm from "./CrearPersonalForm";
 import RolSelector from "./RolSelector";
 
-const ROL_LABELS: Record<string, string> = { proveedor: "Proveedor", supervisor: "Supervisor", admin: "Admin" };
+const ROL_LABELS: Record<string, string> = {
+  proveedor: "Proveedor",
+  supervisor: "Supervisor",
+  admin: "Admin",
+  comex: "Comex",
+};
 
 export default async function UsuariosPage() {
   const supabase = await createClient();

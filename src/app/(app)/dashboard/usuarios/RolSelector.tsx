@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { actualizarRolUsuario } from "./actions";
 
-type Rol = "proveedor" | "supervisor" | "admin";
+type Rol = "proveedor" | "supervisor" | "admin" | "comex";
 
 export default function RolSelector({
   profileId,
@@ -46,6 +46,7 @@ export default function RolSelector({
       >
         <option value="proveedor">Proveedor</option>
         <option value="supervisor">Supervisor</option>
+        <option value="comex">Comex</option>
         <option value="admin">Admin</option>
       </select>
       {error && <p className="text-xs text-red-600 mt-1">{error}</p>}

@@ -65,7 +65,9 @@ export async function proxy(request: NextRequest) {
 
   const esAdmin = profile?.role === "admin";
   const esStaff = esAdmin || profile?.role === "supervisor";
-  const home = esStaff ? "/dashboard" : "/nuevo-turno";
+  const esComex = profile?.role === "comex";
+  const esProveedor = profile?.role === "proveedor";
+  const home = esStaff ? "/dashboard" : esComex ? "/comex/solicitar" : "/nuevo-turno";
 
   if (esLogin || pathname === "/") {
     const url = request.nextUrl.clone();
@@ -75,7 +77,19 @@ export async function proxy(request: NextRequest) {
 
   if (pathname.startsWith("/dashboard") && !esStaff) {
     const url = request.nextUrl.clone();
-    url.pathname = "/nuevo-turno";
+    url.pathname = home;
+    return NextResponse.redirect(url);
+  }
+
+  if (pathname.startsWith("/comex") && !esComex) {
+    const url = request.nextUrl.clone();
+    url.pathname = home;
+    return NextResponse.redirect(url);
+  }
+
+  if ((pathname.startsWith("/nuevo-turno") || pathname.startsWith("/mis-turnos")) && !esProveedor) {
+    const url = request.nextUrl.clone();
+    url.pathname = home;
     return NextResponse.redirect(url);
   }
 

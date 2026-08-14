@@ -89,7 +89,7 @@ export async function crearProveedor(input: {
 export async function crearPersonalInterno(input: {
   email: string;
   fullName: string;
-  role: "admin" | "supervisor";
+  role: "admin" | "supervisor" | "comex";
 }): Promise<ActionResult> {
   const auth = await requireAdmin();
   if (!auth.ok) return { success: false, error: auth.error };
@@ -128,7 +128,7 @@ export async function crearPersonalInterno(input: {
 
 export async function actualizarRolUsuario(
   profileId: string,
-  nuevoRol: "proveedor" | "supervisor" | "admin"
+  nuevoRol: "proveedor" | "supervisor" | "admin" | "comex"
 ): Promise<ActionResult> {
   const auth = await requireAdmin();
   if (!auth.ok) return { success: false, error: auth.error };

@@ -8,7 +8,7 @@ export default function CrearPersonalForm() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
-  const [role, setRole] = useState<"admin" | "supervisor">("supervisor");
+  const [role, setRole] = useState<"admin" | "supervisor" | "comex">("supervisor");
   const [error, setError] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
   const [tempPassword, setTempPassword] = useState<string | null>(null);
@@ -53,10 +53,11 @@ export default function CrearPersonalForm() {
         />
         <select
           value={role}
-          onChange={(e) => setRole(e.target.value as "admin" | "supervisor")}
+          onChange={(e) => setRole(e.target.value as "admin" | "supervisor" | "comex")}
           className="px-3 py-2 rounded-lg border border-slate-300 text-sm text-slate-800 bg-white"
         >
           <option value="supervisor">Supervisor</option>
+          <option value="comex">Comex</option>
           <option value="admin">Admin</option>
         </select>
       </div>
